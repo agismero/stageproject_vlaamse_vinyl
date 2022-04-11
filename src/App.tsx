@@ -2,6 +2,12 @@ import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
 import Home from './pages/Home';
+import List from './pages/List';
+import Mario from './pages/Mario';
+import PikachuFam from './pages/PikachuFam';
+import DonkeyKong from './pages/DonkeyKong';
+import Pichu from './pages/PikachuFam/Pichu';
+import Raichu from './pages/PikachuFam/Raichu';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -28,11 +34,26 @@ const App: React.FC = () => (
   <IonApp>
     <IonReactRouter>
       <IonRouterOutlet>
-        <Route exact path="/home">
-          <Home />
+        <Route exact path="/list">
+          <List />
         </Route>
         <Route exact path="/">
-          <Redirect to="/home" />
+          <Redirect to="/list" />
+        </Route>
+        <Route exact path="/Mario">
+          <Mario />
+        </Route>
+        <Route exact path="/PikachuFam">
+          <PikachuFam />
+        </Route>
+        <Route exact path="/DonkeyKong">
+          <DonkeyKong />
+        </Route>
+        <Route exact path="/PikachuFam/Pichu">
+          <Pichu />
+        </Route>
+        <Route exact path="/PikachuFam/Pichu">
+          <Raichu />
         </Route>
       </IonRouterOutlet>
     </IonReactRouter>
