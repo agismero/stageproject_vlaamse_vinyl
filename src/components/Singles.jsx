@@ -8,6 +8,9 @@ import {
   IonList,
   IonItem,
   IonSpinner,
+  IonThumbnail,
+  IonImg,
+  IonLabel,
 } from "@ionic/react";
 import { useState, useEffect } from "react";
 import "../theme/style.css";
@@ -29,8 +32,16 @@ const getSingles = async (artiestId) =>
     )
   );
 
+const getArtiest = async (artiestId) =>
+  await (
+    await fetch(
+      `https://www.vlaamsevinyl.be/api.php/records/artiest?filter=artiest_id,eq,${artiestId}`
+    )
+  ).json();
+
 const Singles = (props) => {
-  const [details, setDetails] = useState([]);
+  const [singles, setSingles] = useState([]);
+  const [artiest, setArtiest] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
@@ -39,15 +50,18 @@ const Singles = (props) => {
       try {
         setLoading(true);
         setError(false);
-        const data = await getSingles(props.match.params.id);
+        const dataSingle = await getSingles(props.match.params.id);
+        const dataArtiest = await getArtiest(props.match.params.id);
         setLoading(false);
-        setDetails(data);
+        setSingles(dataSingle);
+        setArtiest(dataArtiest.records);
       } catch (error) {
         setLoading(false);
         setError(true);
       }
     })([]);
   }, []);
+  // console.log(artiest);
 
   function compare(a, b) {
     if (a.titel < b.titel) {
@@ -59,8 +73,9 @@ const Singles = (props) => {
     return 0;
   }
 
-  const sorted = details.sort(compare);
-  console.log(sorted);
+  const sorted = singles.sort(compare);
+  // console.log(sorted);
+
   return (
     <>
       <IonPage>
@@ -80,15 +95,31 @@ const Singles = (props) => {
           )}
           {error && <p>Error...</p>}
           <IonList>
-            {sorted.map((result) => (
-              <IonItem
-                key={result.single_id}
-                routerLink={`/detail/${result.single_id}`}
-                detail
-              >
-                {result.titel}
-              </IonItem>
-            ))}
+            {sorted.map((result) => {
+              const slicedUrl = result.foto.slice(0, -4);
+              return (
+                <IonItem
+                  key={result.single_id}
+                  routerLink={`/detail/${result.single_id}`}
+                  detail
+                >
+                  <IonThumbnail slot="start">
+                    <IonImg
+                      height="100px"
+                      src={`http://www.vlaamsevinyl.be/afbeeldingen/hoezen/${artiest.map(
+                        (result) => {
+                          const name = result.naam;
+                          const nameUrl = name.replace(/ /g, "-");
+                          return nameUrl;
+                        }
+                      )}/${slicedUrl}/${result.titel}.jpg`}
+                      alt={artiest.map((result) => result.naam)}
+                    />
+                  </IonThumbnail>
+                  <IonLabel>{result.titel}</IonLabel>
+                </IonItem>
+              );
+            })}
           </IonList>
         </IonContent>
       </IonPage>
