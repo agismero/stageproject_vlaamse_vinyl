@@ -7,15 +7,29 @@ import {
   IonContent,
   IonList,
   IonItem,
-  IonTitle,
   IonSpinner,
 } from "@ionic/react";
 import { useState, useEffect } from "react";
-import axios from "axios";
 import "../theme/style.css";
 
+const getSingles = async (artiestId) =>
+  Promise.all(
+    (
+      await (
+        await fetch(
+          `https://www.vlaamsevinyl.be/api.php/records/single_artiest_combo?filter=artiest_id,eq,${artiestId}`
+        )
+      ).json()
+    ).records.map(async ({ single_id }) =>
+      (
+        await fetch(
+          `https://www.vlaamsevinyl.be/api.php/records/single/${single_id}`
+        )
+      ).json()
+    )
+  );
+
 const Singles = (props) => {
-  const [singles, setSingles] = useState([]);
   const [details, setDetails] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -25,13 +39,9 @@ const Singles = (props) => {
       try {
         setLoading(true);
         setError(false);
-        const {
-          data: { records },
-        } = await axios(
-          `https://www.vlaamsevinyl.be/api.php/records/single_artiest_combo?filter=artiest_id,eq,${props.match.params.id}`
-        );
-        setSingles(records);
+        const data = await getSingles(props.match.params.id);
         setLoading(false);
+        setDetails(data);
       } catch (error) {
         setLoading(false);
         setError(true);
@@ -39,29 +49,18 @@ const Singles = (props) => {
     })([]);
   }, []);
 
-  const singleId = singles.map((result) => result.single_id);
+  function compare(a, b) {
+    if (a.titel < b.titel) {
+      return -1;
+    }
+    if (a.titel > b.titel) {
+      return 1;
+    }
+    return 0;
+  }
 
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        setError(false);
-        const {
-          data: { records },
-        } = await axios(
-          `https://www.vlaamsevinyl.be/api.php/records/single/${singleId}`
-        );
-        setDetails(records);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        setError(true);
-      }
-    })([]);
-  }, []);
-
-  console.log(singles);
-
+  const sorted = details.sort(compare);
+  console.log(sorted);
   return (
     <>
       <IonPage>
@@ -81,8 +80,14 @@ const Singles = (props) => {
           )}
           {error && <p>Error...</p>}
           <IonList>
-            {details.map((result) => (
-              <IonItem detail>{result.titel}</IonItem>
+            {sorted.map((result) => (
+              <IonItem
+                key={result.single_id}
+                routerLink={`/detail/${result.single_id}`}
+                detail
+              >
+                {result.titel}
+              </IonItem>
             ))}
           </IonList>
         </IonContent>

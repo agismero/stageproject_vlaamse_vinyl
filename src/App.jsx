@@ -22,6 +22,7 @@ import "@ionic/react/css/display.css";
 
 /* Theme variables */
 import "./theme/variables.css";
+import Detail from "./components/Detail";
 
 setupIonicReact();
 
@@ -36,6 +37,10 @@ const App = () => (
           <Redirect to="/Artiesten" />
         </Route>
         <Route path="/singles/:id" component={Singles} />
+        <Route exact path="/Singles">
+          <Singles />
+        </Route>
+        <Route path="/detail/:id" component={Detail} />
       </IonRouterOutlet>
     </IonReactRouter>
   </IonApp>
